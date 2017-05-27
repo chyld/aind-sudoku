@@ -55,6 +55,9 @@ def eliminate(values):
     Input: A sudoku in dictionary form.
     Output: The resulting sudoku in dictionary form.
     """
+    # finds all boxes with only one value
+    # then finds the peer boxes for each solved box
+    # if a peer box contains the same number as the solved box, then that number gets removed
     solved_boxes = [box for box in boxes if len(values[box]) == 1]
     for box in solved_boxes:
         digit = values[box]
@@ -72,6 +75,10 @@ def only_choice(values):
     Input: A sudoku in dictionary form.
     Output: The resulting sudoku in dictionary form.
     """
+    # iterate though each unit
+    # inside each unit, iterate through the numbers 1 to 9
+    # then, for example, look for the number "3" in each box in a particular unit
+    # if only one box in a unit has a "3", then mark that box as "3"
     for unit in units:
         for digit in '123456789':
             dplaces = [box for box in unit if digit in values[box]]
@@ -91,6 +98,11 @@ def naked_twins(values):
     Returns:
         the values dictionary with the naked twins eliminated from peers.
     """
+    # iterate through each unit, and then each box in that unit
+    # create a dictionary, and if the value in a box has 2 numbers, like "35" then add "35" to the dictionary with a value of 1
+    # increment this value, 1, if another "35" is found in the same unit
+    # iterate over the dictionary, finding all the two-lettered keys, i.e., "35" or "78" which have been seen only twice in a unit
+    # if another box in that unit contains the value, like "1357", then remove the "35", leaving only "17"
     for unit in units:
         d = defaultdict(int)
         for box in unit:
@@ -114,6 +126,7 @@ def reduce_puzzle(values):
     Input: A sudoku dictionary
     Output: A sudoku dictionary
     """
+    # run through each elimination strategy once
     values = eliminate(values)
     values = only_choice(values)
     values = naked_twins(values)
@@ -130,6 +143,11 @@ def search(values):
     Input: A sudoku dictionary
     Output: On success a sudoku dictionary; On failure, False or None.
     """
+    # first, keep reducing the search space, using elimination, until the dictionary doesn't change any more
+    # then, if the game is solved, return the dictionary
+    # if the board is no longer searchable, i.e., 81 remaining numbers, return false
+    # else find the box with the smallest length, like "87" has length of 2
+    # then guess the "8" and try and recursively solve using DFS. if that doesn't work, try the "7" and solve
     while True:
         reduced = reduce_puzzle(values.copy())
         if is_same(values, reduced): break
